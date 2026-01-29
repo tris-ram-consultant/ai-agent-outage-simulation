@@ -96,109 +96,111 @@ function App() {
         `${now(t)} — ${type} — ${msg}`,
       ]);
     };
+async function run() {
+  const addStep = (label) =>
+    setStepsDone((s) => (s.includes(label) ? s : [...s, label]));
 
-    async function run() {
-      emit("REQUEST", `Request received for ${customer.name}`);
-      setProgress(0.1);
-      await delay(700);
-
-      t = new Date(t.getTime() + 1000);
-      emit("SYSTEM", "Querying CRM");
-      setStepsDone((s) => [...s, "CRM verification"]);
-      setProgress(0.25);
-      await delay(700);
-
-      emit(
-        "VALIDATION",
-        `Account OK — ${customer.dataRemainingGB} GB remaining`
-      );
-      setStepsDone((s) => [...s, "Account entitlement check"]);
-      setProgress(0.45);
-      await delay(700);
-
-      emit(
-        "SYSTEM",
-        `Checking location vs outage map (${zone.area})`
-      );
-      setStepsDone((s) => [...s, "Location correlation"]);
-      setProgress(0.65);
-      await delay(700);
-
-      if (zone.status === "ACTIVE") {
-        emit(
-          "RESULT",
-          `Outage detected — Incident ${zone.incidentId} (${zone.affected} affected)`
-        );
-        setStepsDone((s) => [...s, "Network outage detected"]);
-      } else {
-        emit("RESULT", "No outage detected");
-      }
-
-      setProgress(1);
-      await delay(500);
-
-      emit("STATUS", "Case completed");
-      setStatus("COMPLETED");
-    }
-
-    run();
-    return () => (cancelled = true);
-  }, [mobile, runId]);
-
-  return (
-    <div className="p-6 h-screen grid grid-cols-[320px_1fr] gap-4">
-      <div className="space-y-4">
-        <div className="bg-white p-3 rounded-xl shadow">
-          <h2 className="font-semibold">Controls</h2>
-
-          <button
-            className="mt-2 w-full bg-blue-600 text-white rounded p-2"
-            onClick={() => setRunId((r) => r + 1)}
-          >
-            ▶ Run once
-          </button>
-
-          <button
-            className="mt-2 w-full bg-gray-800 text-white rounded p-2"
-            onClick={() => setAutoplay((a) => !a)}
-          >
-            {autoplay ? "⏸ Pause autoplay" : "▶ Resume autoplay"}
-          </button>
-        </div>
-
-        <div className="bg-white p-3 rounded-xl shadow">
-          <p className="text-sm">Customer: {customer.name}</p>
-          <p className="text-sm">Mobile: {mobile}</p>
-          <p className="text-sm">
-            Status: <span className="font-semibold">{status}</span>
-          </p>
-
-          <div className="w-full bg-gray-200 h-2 rounded mt-2">
-            <div
-              className="bg-blue-600 h-2 rounded"
-              style={{ width: `${progress * 100}%` }}
-            />
-          </div>
-
-          <ul className="text-xs mt-2 space-y-1">
-            {stepsDone.map((s) => (
-              <li key={s}>✔ {s}</li>
-            ))}
-          </ul>
-        </div>
-      </div>
-
-      <div className="bg-black text-green-400 font-mono text-xs p-3 rounded-xl overflow-y-auto">
-        <div className="text-white font-semibold mb-2">
-          Event Log
-        </div>
-        {events.map((e, i) => (
-          <div key={i}>{e}</div>
-        ))}
-      </div>
-    </div>
+  emit(
+    "REQUEST",
+    `Request received from front-facing Agentic AI (mobile ${mobile})`
   );
+  setProgress(0.05);
+  await delay(600);
+
+  t = new Date(t.getTime() + 1000);
+  emit("SYSTEM", "Querying CRM to cross-check customer information.");
+  addStep("CRM customer verification");
+  setProgress(0.1);
+  await delay(600);
+
+  emit(
+    "RESULT",
+    `Customer match confirmed: ${customer.name} associated with mobile ${mobile}.`
+  );
+  setProgress(0.15);
+  await delay(600);
+
+  t = new Date(t.getTime() + 1000);
+  emit(
+    "SYSTEM",
+    "AI initiated proactive network diagnostics on customer device."
+  );
+  setProgress(0.2);
+  await delay(600);
+
+  emit(
+    "VALIDATION",
+    "Checking device network state: mobile data enabled, airplane mode off."
+  );
+  addStep("Device network state check");
+  setProgress(0.25);
+  await delay(600);
+
+  emit(
+    "VALIDATION",
+    "Validating SIM registration and provisioning status."
+  );
+  addStep("SIM registration & provisioning");
+  setProgress(0.3);
+  await delay(600);
+
+  emit(
+    "VALIDATION",
+    `Checking account entitlement: ${customer.dataRemainingGB} GB remaining; no FUP applied; account in good standing.`
+  );
+  addStep("Account entitlement check");
+  setProgress(0.4);
+  await delay(600);
+
+  emit(
+    "VALIDATION",
+    "Checking service impact: voice & SMS unaffected; mobile data impacted."
+  );
+  addStep("Service impact analysis");
+  setProgress(0.5);
+  await delay(600);
+
+  t = new Date(t.getTime() + 1000);
+  emit(
+    "SYSTEM",
+    "Reading customer location (coarse) and correlating with outage map."
+  );
+  addStep("Location & zone correlation");
+  setProgress(0.65);
+  await delay(600);
+
+  emit(
+    "SYSTEM",
+    `Querying network health and incident feeds for Zone ${customer.zone}.`
+  );
+  setProgress(0.8);
+  await delay(600);
+
+  if (zone.status === "ACTIVE") {
+    emit(
+      "RESULT",
+      `Ongoing network outage detected — Incident ${zone.incidentId}, ${zone.affected} customers affected.`
+    );
+    addStep("Network outage detected");
+  } else {
+    emit("RESULT", "No outage detected in customer area.");
+  }
+
+  setProgress(0.95);
+  await delay(600);
+
+  emit(
+    "RESPONSE",
+    `Diagnostic results sent back to front-facing Agentic AI for ${customer.name}.`
+  );
+  setProgress(1);
+  await delay(400);
+
+  emit("STATUS", "Case completed successfully.");
+  setStatus("COMPLETED");
 }
+
+   
 
 /* =============================
    Mount React App
