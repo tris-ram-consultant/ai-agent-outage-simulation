@@ -200,8 +200,6 @@ async function run() {
   setStatus("COMPLETED");
 }
 
-   
-
 /* =============================
    Mount React App
 ============================= */
